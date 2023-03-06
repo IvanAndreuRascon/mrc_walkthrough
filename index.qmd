@@ -1,0 +1,112 @@
+---
+title: "Untitled"
+format: html
+editor: visual
+toc: true
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r}
+#| label: setup
+#| message: false
+#| warning: false
+
+library("ds4ling")
+library("tidyverse")
+library("untidydata")
+library("broom")
+library("emmeans")
+```
+
+```{r}
+#| label: explore-data
+
+ld <- language_diversity %>%
+  mutate_if(is.character, as.factor) %>%
+  pivot_wider(
+    names_from = Measurement,
+    values_from = Value
+    ) %>%
+  mutate(
+    lang_log = log(Langs),
+    area_log = log(Area),
+    pop_log = log(Population)
+    )
+
+
+ld %>%
+  ggplot() +
+  aes (x = Population, y = Langs) +
+  geom_point() +
+geom_smooth(method = "lm")
+
+
+
+
+dim(ld)
+str(ld)
+glimpse(ld)
+
+summary(language_diversity) 
+
+
+```
+
+```{r}
+#| label: fit-model 
+
+mean(ld$lang_log)
+
+
+mod_0 <- lm(lang_log ~ 1,                               data = ld)
+
+mod_1 <- lm(lang_log ~ 1 +            pop_log,          data = ld)
+
+mod_2 <- lm(lang_log ~ 1 + area_log + pop_log,          data = ld)
+mod_3 <- lm(lang_log ~ 1 + area_log + pop_log + pop_log:area_log, data = ld)
+
+summary(mod_0)
+summary(mod_1)
+summary(mod_2)
+summary(mod_3)
+
+```
+
+# tables and plots
+
+
+```{r}
+#| lable: tbl-model
+
+tidy(mod_3) %>%
+  knitr::kable(format = "pandoc")
+
+```
+
+
+```{r}
+
+emmeans(object = mod_1, specs = ~ pop_log
+        specs = ~ pop_log,
+        at = list(pop_log = seq(0, 20, by = 1))
+)
+
+
+```
+
+
+```{r}
+emmeans(object = mod_3, 
+        specs = ~ pop_log * area_log, 
+        at = 
+
+
+```
+
+
+
+
+
+
+
